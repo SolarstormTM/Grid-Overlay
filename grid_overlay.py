@@ -9,10 +9,10 @@
 from gimpfu import *
 
 def grid_overlay(img, layer, col, row) :
-    exists, x1, y1, x2, y2 = pdb.gimp_selection_bounds(img)
-    
+	exists, x1, y1, x2, y2 = pdb.gimp_selection_bounds(img)
+
 	if not exists :
-        return
+		return
 	
 	length = x2 - x1
 	height = y2 - y1
@@ -22,16 +22,24 @@ def grid_overlay(img, layer, col, row) :
 	
 	pdb.gimp_image_undo_group_start(img)
 	
-	new_layer = pdb.gimp_image_insert_layer(img, layer, 0, 0)
+	#new_layer = pdb.gimp_image_insert_layer(img, layer, 0, 0)
 	pdb.gimp_selection_none(img)
-	for i in range(0,row) :
+	for i in range(0,row + 1) :
 		if i == 0 :
 			var = x1
 		else :
 			var = var + y_step
 		vec = [x1,var,x2,var]
 		pdb.gimp_paintbrush_default(layer, len(vec), vec)
-	
+
+	for i in range(0, col + 1) :
+		if i == 0 :
+			var = y1
+		else :
+			var = var + x_step
+		vec = [var, y1, var, y2]
+		pdb.gimp_paintbrush_default(layer, len(vec), vec)
+
 	pdb.gimp_image_undo_group_end(img)		
 
 register(
@@ -43,15 +51,15 @@ register(
          "<Image>/Filters/Render/Grid Overlay...",
          "*",
          [
-           (PF_INT, "col",  "Columns", 10),
-           (PF_INT, "row",  "Rows", 10),
-           #(PF_INT, "t",  "Thickness", 3),
-           #(PF_COLOR , "gridcolor",  "Grid Color", (0,0,0)),
-		   #(PF_BOOL, "captionenable",  "Enable Caption", 1),
-           #(PF_FONT, "fontname",  "Caption Font", "Arial"),
-           #(PF_COLOR , "fontcolor",  "Font Color", (0,0,0)),
+			(PF_INT, "col",  "Columns", 10),
+			(PF_INT, "row",  "Rows", 10),
+			#(PF_INT, "t",  "Thickness", 3),
+			#(PF_COLOR , "gridcolor",  "Grid Color", (0,0,0)),
+			#(PF_BOOL, "captionenable",  "Enable Caption", 1),
+			#(PF_FONT, "fontname",  "Caption Font", "Arial"),
+			#(PF_COLOR , "fontcolor",  "Font Color", (0,0,0)),
          ],
          [],
-         grid_overlay, menu="<Image>/Filters/Render")
+         grid_overlay)
 
 main()

@@ -7,6 +7,15 @@
 
 
 from gimpfu import *
+# This is a copy from http://stackoverflow.com/questions/14381940/python-pair-alphabets-after-loop-is-completed
+from itertools import count, product, islice
+from string import ascii_uppercase
+
+def multiletters(seq):
+	for n in count(1):
+		for s in product(seq, repeat=n):
+			yield ''.join(s)
+# End
 
 def grid_overlay(img, layer, col, row) :
 	exists, x1, y1, x2, y2 = pdb.gimp_selection_bounds(img)
@@ -98,21 +107,37 @@ def grid_overlay_quadrat(img, layer, pixel) :
 	pdb.gimp_image_insert_layer(img, new_layer, None, -1)
 	savesel = pdb.gimp_selection_save(img)
 	pdb.gimp_selection_none(img)
-
+	# Let's draw the horizontal lines and caption
+	m = multiletters(ascii_uppercase)
 	for i in range(0,y_step + 1) :
+		letter = next(m)
+		
+		#pdb.gimp_message(letter)
 		if i == 0 :
 			var = y1
-			#pdb.gimp_message("var: " + str(var) + " i: " + str(i))
+			y_letter = y1 + int(round(float(pixel)/4, 0))
 		else :
 			var = var + pixel
+			y_letter = y_letter + pixel
+		if i != y_step :
+			fontlayer = pdb.gimp_text_fontname(img, None, 0, 0, letter, 0, TRUE, float(pixel)/2, 0, "Arial")
+			pdb.plug_in_autocrop_layer(img, fontlayer)
+			pdb.gimp_layer_set_offsets(fontlayer, x1 - int(round(float(pixel)/2)) * len(letter), y_letter)
 		vec = [x1,var,x1 + new_length,var]
 		pdb.gimp_pencil(new_layer, len(vec), vec)
 
+		# Let's draw the vertical lines and caption
 	for i in range(0, x_step + 1) :
 		if i == 0 :
 			var = x1
+			x_letter = x1 + int(round(float(pixel)/2, 0))
 		else :
 			var = var + pixel
+			x_letter = x_letter + pixel
+		if i != x_step :
+			fontlayer = pdb.gimp_text_fontname(img, None, 0, 0, str(i+1), 0, TRUE, float(pixel)/2, 0, "Arial")
+			pdb.plug_in_autocrop_layer(img, fontlayer)
+			pdb.gimp_layer_set_offsets(fontlayer, x_letter - int(round(float(fontlayer.width), 0))/2, y1 - int(round(float(pixel)/2)))
 		vec = [var, y1, var, y1 + new_height]
 		pdb.gimp_pencil(new_layer, len(vec), vec)
 
